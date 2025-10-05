@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PsicoSuper - Dashboard Supervisor</title>
+    <link rel="stylesheet" href="./css/dashboard-sup.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-user-tie"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h2>Supervisor</h2>
+                        <p>Dashboard</p>
+                    </div>
+                </div>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul class="nav-menu">
+                    <li class="nav-item">
+                        <button class="nav-button active" data-tab="agenda">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>Agenda</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-button" data-tab="solicitacoes">
+                            <i class="fas fa-users"></i>
+                            <span>Solicitações</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-button" data-tab="conversas">
+                            <i class="fas fa-comments"></i>
+                            <span>Conversas</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-button" data-tab="perfil">
+                            <i class="fas fa-user"></i>
+                            <span>Perfil</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-button" id="logout-btn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Sair</span>
+                        </button>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <button class="sidebar-toggle" id="sidebar-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="header-user">
+                    <span id="user-welcome">Bem-vindo, Dr. Ana Beatriz</span>
+                </div>
+            </header>
+
+            <!-- Content Area -->
+            <div class="content">
+                <!-- Agenda -->
+                <section class="tab-content active" id="agenda-tab">
+                    <div class="page-header">
+                        <h1>Agenda</h1>
+                        <p>Gerencie seus compromissos e supervisões</p>
+                    </div>
+
+                    <div class="agenda-grid">
+                        <div class="agenda-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-calendar-alt"></i> Próximos Compromissos</h3>
+                            </div>
+                            <div class="card-content">
+                                <div id="proximos-compromissos">
+                                    <!-- Compromissos serão inseridos via JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="agenda-card">
+                            <div class="card-header">
+                                <h3><i class="fas fa-chart-line"></i> Resumo do Dia</h3>
+                            </div>
+                            <div class="card-content">
+                                <div class="summary-item">
+                                    <span>Supervisões agendadas</span>
+                                    <span class="summary-value" id="supervisoes-count">3</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Solicitações pendentes</span>
+                                    <span class="summary-value" id="solicitacoes-count">2</span>
+                                </div>
+                                <div class="summary-item">
+                                    <span>Conversas não lidas</span>
+                                    <span class="summary-value" id="conversas-count">1</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <h3>Calendário</h3>
+                            <div class="calendar-nav">
+                                <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                                <span id="current-month"></span>
+                                <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+                            </div>
+                        </div>
+                        <div id="calendar-grid" class="calendar-grid"></div>
+                    </div>
+                </section>
+
+                <!-- Solicitações -->
+                <section class="tab-content" id="solicitacoes-tab">
+                    <div class="page-header">
+                        <h1>Solicitações</h1>
+                        <p>Gerencie as solicitações de supervisão</p>
+                    </div>
+
+                    <div id="solicitacoes-list" class="solicitacoes-container">
+                        <!-- Solicitações serão inseridas via JavaScript -->
+                    </div>
+
+                    <div class="empty-state" id="solicitacoes-empty-state" style="display: none;">
+                        <i class="fas fa-users"></i>
+                        <h3>Nenhuma solicitação</h3>
+                        <p>Suas solicitações de supervisão aparecerão aqui</p>
+                    </div>
+                </section>
+
+                <!-- Conversas -->
+                <section class="tab-content" id="conversas-tab">
+                    <div class="page-header">
+                        <h1>Conversas</h1>
+                        <p>Suas conversas com psicólogos</p>
+                    </div>
+
+                    <div class="empty-state" id="conversas-empty-state">
+                        <i class="fas fa-comments"></i>
+                        <h3>Nenhuma conversa iniciada</h3>
+                        <p>Suas conversas com psicólogos aparecerão aqui</p>
+                    </div>
+
+                    <div id="chat-container" style="display:none;">
+                        <div class="chat-layout">
+                            <div class="chat-sidebar">
+                                <h4>Conversas Ativas</h4>
+                                <div id="contact-list"></div>
+                            </div>
+                            <div class="chat-main">
+                                <div id="chat-header">Selecione uma conversa para começar</div>
+                                <div id="chat-messages"></div>
+                                <div id="chat-input-area" style="display:none;">
+                                    <input type="text" id="inputMensagem" placeholder="Digite uma mensagem..." />
+                                    <button onclick="enviarMensagem()">Enviar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Perfil -->
+                <section class="tab-content" id="perfil-tab">
+                    <div class="page-header">
+                        <h1>Perfil</h1>
+                        <p>Suas informações pessoais</p>
+                    </div>
+                    
+                    <div class="profile-card">
+                        <div class="profile-header">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="profile-info">
+                                <h2>Dr. Ana Beatriz Souza</h2>
+                                <p>Supervisora Registrada</p>
+                            </div>
+                        </div>
+                        <div class="profile-details">
+                            <div class="detail-item">
+                                <i class="fas fa-user"></i>
+                                <div>
+                                    <p class="detail-label">Nome</p>
+                                    <p class="detail-value">Ana Beatriz Souza</p>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-envelope"></i>
+                                <div>
+                                    <p class="detail-label">E-mail</p>
+                                    <p class="detail-value">ana.souza@psiconecta.com</p>
+                                </div>
+                            </div>
+                            <div class="detail-item">
+                                <i class="fas fa-id-card"></i>
+                                <div>
+                                    <p class="detail-label">CRP</p>
+                                    <p class="detail-value">06/12345</p>
+                                </div>
+                            </div>
+                       
+                        </div>
+                        <div class="profile-actions">
+                            <button class="btn-secondary">Editar Perfil</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <script src="./js/dashboard-sup.js"></script>
+</body>
+</html>
