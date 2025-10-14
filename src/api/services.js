@@ -4,7 +4,7 @@ import { get, post } from "./client.js";
 // Usuários
 export const UsersService = {
   listSupervisors: (token) => get("/supervisores", token),
-  listPsychologists: (token) => get("psicologos", token),
+  listPsychologists: (token) => get("/psicologos", token),
 };
 
 // Solicitações (Requests)
