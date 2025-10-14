@@ -1,0 +1,55 @@
+/* Agenda */
+.agenda-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px; margin-bottom: 32px; }
+.agenda-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; }
+.card-header { padding: 20px; border-bottom: 1px solid #f1f5f9; background: #f8fafc; }
+.card-header h3 { font-size: 16px; font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 8px; }
+.card-content { padding: 20px; }
+.summary-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #f1f5f9; }
+.summary-item:last-child { border-bottom: none; }
+.summary-value { font-weight: 600; color: #1e293b; font-size: 18px; }
+.compromisso-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 12px; }
+.compromisso-info h4 { font-size: 14px; font-weight: 500; color: #1e293b; margin-bottom: 4px; }
+.compromisso-info p { font-size: 12px; color: #64748b; }
+.compromisso-badge { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; }
+.badge-supervisao { background: #dbeafe; color: #1d4ed8; }
+.badge-reuniao { background: #f3f4f6; color: #374151; }
+
+/* Calendário */
+.calendar-container { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 24px; }
+.calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.calendar-header h3 { font-size: 18px; font-weight: 600; color: #1e293b; }
+.calendar-nav { display: flex; align-items: center; gap: 16px; }
+.calendar-nav button {
+  background: none; border: 1px solid #e2e8f0; border-radius: 6px; padding: 8px; cursor: pointer; color: #64748b; transition: all .2s ease;
+}
+.calendar-nav button:hover { background: #f8fafc; border-color: #cbd5e1; }
+#current-month { font-weight: 500; color: #1e293b; min-width: 150px; text-align: center; }
+.calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; background: #e2e8f0; border-radius: 8px; overflow: hidden; }
+.calendar-day {
+  background: #fff; padding: 12px; text-align: center; font-size: 14px; cursor: pointer; transition: background-color .2s ease; min-height: 40px; display: flex; align-items: center; justify-content: center;
+}
+.calendar-day:hover { background: #f8fafc; }
+.calendar-day.today { background: #dbeafe; color: #1d4ed8; font-weight: 600; }
+.calendar-day.has-event { background: #fef3c7; color: #92400e; font-weight: 500; }
+.calendar-day.other-month { color: #cbd5e1; }
+
+/* Solicitações */
+.solicitacoes-container { display: flex; flex-direction: column; gap: 16px; }
+.solicitacao-card { background: #fff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; transition: box-shadow .2s ease; }
+.solicitacao-card:hover { box-shadow: 0 4px 12px rgba(0,0,0,.1); }
+.solicitacao-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.solicitacao-info { display: flex; align-items: center; gap: 12px; }
+.solicitacao-avatar {
+  width: 48px; height: 48px; background: #dbeafe; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 18px; font-weight: 600;
+}
+.solicitacao-details h3 { font-size: 16px; font-weight: 600; color: #1e293b; margin-bottom: 4px; }
+.solicitacao-details p { font-size: 14px; color: #64748b; margin-bottom: 2px; }
+.solicitacao-actions { display: flex; gap: 8px; }
+.status-badge { padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 500; }
+.status-pendente { background: #fef3c7; color: #92400e; }
+.status-aceita { background: #dcfce7; color: #166534; }
+.status-recusada { background: #fee2e2; color: #dc2626; }
+
+@media (max-width: 768px) {
+  .agenda-grid { grid-template-columns: 1fr; }
+}
