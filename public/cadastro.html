@@ -93,7 +93,7 @@
     .form-container h2 {
       font-size: 2.2rem;
       margin-bottom: 35px;
-      background: linear-gradient(135deg, #fdfdfd, #2a5298);
+      background: linear-gradient(#2a5298);
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
@@ -167,7 +167,6 @@
     }
 
     .form-container button:hover {
-      background: linear-gradient(135deg, #1e3c72, #2a5298);
       transform: translateY(-2px);
       box-shadow: 0 6px 20px rgba(74, 144, 226, 0.5);
     }
@@ -238,6 +237,10 @@
         font-size: 15px;
       }
     }
+    #crp {
+  transition: all 0.3s ease;
+}
+
   </style>
 </head>
 <body>
@@ -267,6 +270,22 @@
 const API_BASE = "https://willing-brett-psiconecta-48c1f0c2.koyeb.app";
 
 const form = document.getElementById("cadastroForm");
+
+const tipoUsuarioSelect = document.getElementById("tipoUsuario");
+const crpContainer = document.getElementById("crpContainer");
+
+
+tipoUsuarioSelect.addEventListener("change", () => {
+  if (tipoUsuarioSelect.value === "psicologo") {
+    crp.style.display = "none"; 
+    document.getElementById("crp").value = ""; 
+  } else {
+    crp.style.display = "block"; 
+  }
+});
+
+
+
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();

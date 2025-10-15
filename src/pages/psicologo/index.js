@@ -36,7 +36,7 @@ function renderSupervisors(items) {
     card.className = "supervisor-card";
     card.innerHTML = `
       <div class="supervisor-header">
-        <img src="${s.image || "./imgs/perfil-foto.svg"}" alt="Foto de ${s.nome || "Supervisor"}" class="supervisor-photo">
+        <img src="${s.image || "../../assets/img/perfil-foto.svg"}" alt="Foto de ${s.nome || "Supervisor"}" class="supervisor-photo">
         <div class="supervisor-info">
           <h3 class="supervisor-name">${s.nome || "Sem nome"}</h3>
           <span class="supervisor-exp">${s.experience || ""}</span>

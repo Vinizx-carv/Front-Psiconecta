@@ -1,5 +1,10 @@
 // ui/chat.js
+
+
+
 import { formatDateTimeISO } from "../utils/dates.js";
+
+
 
 export function renderContacts(listEl, items, onOpen) {
   listEl.innerHTML = "";
