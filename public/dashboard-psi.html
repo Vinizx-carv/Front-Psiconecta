@@ -1,191 +1,214 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PsicoSuper - Dashboard Psicólogo</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PsicoSuper - Dashboard Psicólogo</title>
 
- <link rel="stylesheet" href="../src/styles/global.css">
-<link rel="stylesheet" href="../src/styles/chat.css">
-<link rel="stylesheet" href="../src/styles/dashboard-psicologo.css">
+    <link rel="stylesheet" href="../src/styles/global.css" />
+    <link rel="stylesheet" href="../src/styles/chat.css" />
+    <link rel="stylesheet" href="../src/styles/dashboard-psicologo.css" />
 
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-</head>
-<body>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
     <div class="dashboard">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="logo-text">
-                        <h2>Psicologo</h2>
-                        <p>Dashboard</p>
-                    </div>
+      <!-- Sidebar -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+          <div class="logo">
+            <div class="logo-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="logo-text">
+              <h2>Psicologo</h2>
+              <p>Dashboard</p>
+            </div>
+          </div>
+        </div>
+
+        <nav class="sidebar-nav">
+          <ul class="nav-menu">
+            <li class="nav-item">
+              <button class="nav-button active" data-tab="search">
+                <i class="fas fa-search"></i>
+                <span>Procurar Supervisores</span>
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-button" data-tab="requests">
+                <i class="fas fa-user-check"></i>
+                <span>Solicitações</span>
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-button" data-tab="conversations">
+                <i class="fas fa-comments"></i>
+                <span>Conversas</span>
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-button" data-tab="profile">
+                <i class="fas fa-user"></i>
+                <span>Perfil</span>
+              </button>
+            </li>
+            <li class="nav-item">
+              <button class="nav-button" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Sair</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Header -->
+        <header class="header">
+          <button class="sidebar-toggle" id="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <div class="header-user">
+            <span id="user-welcome">Bem-vindo</span>
+          </div>
+        </header>
+
+        <!-- Content Area -->
+        <div class="content">
+          <!-- Procurar Supervisores -->
+          <section class="tab-content active" id="search-tab">
+            <div class="page-header">
+              <h1>Procurar Supervisores</h1>
+              <p>
+                Encontre supervisores especializados na sua área de interesse
+              </p>
+            </div>
+
+            <div class="search-container">
+              <div class="search-input-wrapper">
+                <i class="fas fa-search search-icon"></i>
+                <input
+                  type="text"
+                  id="search-input"
+                  placeholder="Buscar por nome ou área de atuação..."
+                  class="search-input"
+                />
+              </div>
+            </div>
+
+            <div class="supervisors-grid" id="supervisors-grid">
+              <!-- Cards serão inseridos via JavaScript -->
+            </div>
+
+            <div class="no-results" id="no-results" style="display: none">
+              <i class="fas fa-search"></i>
+              <p>Nenhum supervisor encontrado</p>
+            </div>
+          </section>
+
+          <!-- Solicitações -->
+          <section class="tab-content" id="requests-tab">
+            <div class="page-header">
+              <h1>Solicitações</h1>
+              <p>Acompanhe suas solicitações de supervisão</p>
+            </div>
+
+            <!-- Aqui ficará a lista das solicitações -->
+            <div id="requests-list"></div>
+
+            <!-- Estado vazio, quando não tiver solicitações -->
+            <div class="empty-state" id="requests-empty-state">
+              <i class="fas fa-user-check"></i>
+              <h3>Nenhuma solicitação por enquanto</h3>
+              <p>Suas solicitações de supervisão aparecerão aqui</p>
+            </div>
+          </section>
+
+          <!-- Conversas -->
+          <section class="tab-content" id="conversations-tab">
+            <div class="page-header">
+              <h1>Conversas</h1>
+              <p>Suas conversas com supervisores</p>
+            </div>
+
+            <div class="empty-state" id="conversations-empty-state">
+              <i class="fas fa-comments"></i>
+              <h3>Nenhuma conversa iniciada</h3>
+              <p>Suas conversas aparecerão aqui</p>
+            </div>
+
+            <div id="chat-container" class="chat" style="display: none">
+              <aside class="chat-sidebar">
+                <div id="contact-list" class="contact-list"></div>
+              </aside>
+              <section class="chat-main">
+                <header class="chat-header" id="chat-header">
+                  Selecione uma conversa
+                </header>
+                <div id="chat-messages" class="chat-messages"></div>
+                <footer
+                  class="chat-input"
+                  id="chat-input-area"
+                  style="display: none"
+                >
+                  <input
+                    type="text"
+                    id="inputMensagem"
+                    class="chat-input-field"
+                    placeholder="Digite uma mensagem..."
+                  />
+                  <button id="send-btn" class="chat-send-btn">Enviar</button>
+                </footer>
+              </section>
+            </div>
+          </section>
+
+          <!-- Perfil -->
+          <section class="tab-content" id="profile-tab">
+            <div class="page-header">
+              <h1>Perfil</h1>
+              <p>Suas informações pessoais</p>
+            </div>
+            <div class="profile-card">
+              <div class="profile-header">
+                <div class="profile-avatar">
+                  <i class="fas fa-user"></i>
                 </div>
+                <div class="profile-info">
+                  <h2>Psicólogo João Silva</h2>
+                  <p>Psicólogo Registrado</p>
+                </div>
+              </div>
+              <div class="profile-details">
+                <div class="detail-item">
+                  <i class="fas fa-envelope"></i>
+                  <div>
+                    <p class="detail-label">E-mail</p>
+                    <p class="detail-value">joao.silva@exemplo.com</p>
+                  </div>
+                </div>
+                <div class="detail-item">
+                  <i class="fas fa-briefcase"></i>
+                  <div>
+                    <p class="detail-label">Área de Atuação</p>
+                    <p class="detail-value">Psicologia Clínica</p>
+                  </div>
+                </div>
+              </div>
+              <div class="profile-actions">
+                <button class="btn-secondary">Editar Perfil</button>
+              </div>
             </div>
-            
-            <nav class="sidebar-nav">
-                <ul class="nav-menu">
-                    <li class="nav-item">
-                        <button class="nav-button active" data-tab="search">
-                            <i class="fas fa-search"></i>
-                            <span>Procurar Supervisores</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-button" data-tab="requests">
-                            <i class="fas fa-user-check"></i>
-                            <span>Solicitações</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-button" data-tab="conversations">
-                            <i class="fas fa-comments"></i>
-                            <span>Conversas</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-button" data-tab="profile">
-                            <i class="fas fa-user"></i>
-                            <span>Perfil</span>
-                        </button>
-                    </li>
-                    <li class="nav-item">
-                        <button class="nav-button" id="logout-btn">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Sair</span>
-                        </button>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="header">
-                <button class="sidebar-toggle" id="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-             <div class="header-user">
-    <span id="user-welcome">Bem-vindo</span>
-</div>
-
-            </header>
-
-            <!-- Content Area -->
-            <div class="content">
-                <!-- Procurar Supervisores -->
-                <section class="tab-content active" id="search-tab">
-                    <div class="page-header">
-                        <h1>Procurar Supervisores</h1>
-                        <p>Encontre supervisores especializados na sua área de interesse</p>
-                    </div>
-
-                    <div class="search-container">
-                        <div class="search-input-wrapper">
-                            <i class="fas fa-search search-icon"></i>
-                            <input type="text" id="search-input" placeholder="Buscar por nome ou área de atuação..." class="search-input">
-                        </div>
-                    </div>
-
-                    <div class="supervisors-grid" id="supervisors-grid">
-                        <!-- Cards serão inseridos via JavaScript -->
-                    </div>
-
-                    <div class="no-results" id="no-results" style="display: none;">
-                        <i class="fas fa-search"></i>
-                        <p>Nenhum supervisor encontrado</p>
-                    </div>
-                </section>
-
-                <!-- Solicitações -->
-               <section class="tab-content" id="requests-tab">
-                    <div class="page-header">
-                        <h1>Solicitações</h1>
-                         <p>Acompanhe suas solicitações de supervisão</p>
-                    </div>
-
-                <!-- Aqui ficará a lista das solicitações -->
-                <div id="requests-list"></div>
-
-                <!-- Estado vazio, quando não tiver solicitações -->
-               <div class="empty-state" id="requests-empty-state">
-                    <i class="fas fa-user-check"></i>
-                    <h3>Nenhuma solicitação por enquanto</h3>
-                    <p>Suas solicitações de supervisão aparecerão aqui</p>
-                    </div>
-                </section>
-        
-                <!-- Conversas -->
-      <section class="tab-content" id="conversations-tab">
-  <div class="page-header">
-    <h1>Conversas</h1>
-    <p>Suas conversas com supervisores</p>
-  </div>
-
-  <div class="empty-state" id="conversations-empty-state">
-    <i class="fas fa-comments"></i>
-    <h3>Nenhuma conversa iniciada</h3>
-    <p>Suas conversas com supervisores aparecerão aqui</p>
-  </div>
-
-  <div id="chat-container" style="display:none;">
-    <div id="contact-list"></div>
-    <div id="chat-box">
-      <div id="chat-header"></div>
-      <div id="chat-messages"></div>
-      <div id="chat-input-area" style="display:none;">
-        <input type="text" id="inputMensagem" placeholder="Digite uma mensagem..." />
-        <button onclick="enviarMensagem()">Enviar</button>
-      </div>
-    </div>
-  </div>
-</section>
-                <!-- Perfil -->
-                <section class="tab-content" id="profile-tab">
-                    <div class="page-header">
-                        <h1>Perfil</h1>
-                        <p>Suas informações pessoais</p>
-                    </div>
-                    <div class="profile-card">
-                        <div class="profile-header">
-                            <div class="profile-avatar">
-                                <i class="fas fa-user"></i>
-                            </div>
-                            <div class="profile-info">
-                                <h2>Psicólogo João Silva</h2>
-                                <p>Psicólogo Registrado</p>
-                            </div>
-                        </div>
-                        <div class="profile-details">
-                            <div class="detail-item">
-                                <i class="fas fa-envelope"></i>
-                                <div>
-                                    <p class="detail-label">E-mail</p>
-                                    <p class="detail-value">joao.silva@exemplo.com</p>
-                                </div>
-                            </div>
-                            <div class="detail-item">
-                                <i class="fas fa-briefcase"></i>
-                                <div>
-                                    <p class="detail-label">Área de Atuação</p>
-                                    <p class="detail-value">Psicologia Clínica</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="profile-actions">
-                            <button class="btn-secondary">Editar Perfil</button>
-                        </div>
-                    </div>
-                </section>
-            </div>
-        </main>
+          </section>
+        </div>
+      </main>
     </div>
 
     <script type="module" src="../src/pages/psicologo/index.js"></script>
-</body>
+  </body>
 </html>

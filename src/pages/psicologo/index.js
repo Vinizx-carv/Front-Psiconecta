@@ -4,7 +4,8 @@
 import { mountTabs } from "../../ui/tabs.js";
 import { renderContacts, renderThread } from "../../ui/chat.js";
 import { getLoggedUser, clearSession } from "../../utils/storage.js";
-import { UsersService, RequestsService, MessagesService } from "../../api/services.js";
+import { UsersService, RequestsService, MessagesService, ConversationsService } from "../../api/services.js";
+
 
 
 let state = {
@@ -14,8 +15,10 @@ let state = {
   myRequests: [],
   conversations: [],
   currentPeerId: null,
+  currentConversationId: null, // NOVO
   polling: null,
 };
+
 
 function qs(id) { return document.getElementById(id); }
 
@@ -47,8 +50,11 @@ function renderSupervisors(items) {
       </div>
       <p class="supervisor-description">${s.descricao || "Descrição não disponível"}</p>
       <div class="supervisor-footer">
-        <button class="btn-primary" data-request="${s.id}" data-name="${s.nome || "Supervisor"}">Solicitar Supervisão</button>
-      </div>
+  <button class="btn-primary" data-request="${s.id}" data-name="${s.nome || 'Supervisor'}" onclick="this.disabled=true; this.innerText='Enviado...';">
+    Solicitar Supervisão
+  </button>
+</div>
+
     `;
     grid.appendChild(card);
   });
@@ -61,11 +67,13 @@ function renderSupervisors(items) {
   const supervisorName = btn.dataset.name;
   const psicologoId = state.psychologistId; // vindo do usuário logado/bypass
 
-  const payload = {
-    psicologo: { id: psicologoId },
-    supervisor: { id: supervisorId },
-    mensagem: "Gostaria de iniciar supervisão"
-  };
+ const payload = {
+  psicologo: { id: psicologoId },
+  supervisor: { id: supervisorId },
+  mensagem: "Gostaria de iniciar supervisão"
+};
+await RequestsService.create(payload, state.token);
+
 
   try {
     await RequestsService.create(payload, state.token); // em DEV pode passar undefined
@@ -86,7 +94,12 @@ function renderSupervisors(items) {
 }
 
 async function loadMyRequests() {
-  state.myRequests = await RequestsService.byPsychologist(state.psychologistId, state.token);
+  try {
+    state.myRequests = await RequestsService.byPsychologist(state.psychologistId, state.token);
+  } catch (e) {
+    console.warn("Falha ao carregar solicitações:", e);
+    state.myRequests = [];
+  }
   renderMyRequests(state.myRequests);
 }
 
@@ -108,23 +121,57 @@ function renderMyRequests(list) {
   });
 }
 
+// src/pages/psicologo/index.js
 async function loadConversations() {
-  const accepted = state.myRequests.filter(s => s.status === "ACEITA");
-  const convs = await Promise.all(accepted.map(async s => {
-    const msgs = await MessagesService.thread(state.psychologistId, s.supervisorId, state.token);
-    const last = msgs.at(-1);
-    return {
-      peerId: s.supervisorId,
-      name: s.supervisor?.nome || `Supervisor ${s.supervisorId}`,
-      lastMessage: last?.conteudo || "Conversa iniciada",
-      timestamp: last?.dataEnvio || new Date().toISOString(),
-      unread: msgs.some(m => !m.lida && m.remetenteId === s.supervisorId),
-      messages: msgs,
-    };
-  }));
+  const accepted = (state.myRequests || []).filter(s => s.status === "ACEITA");
+
+  const convs = [];
+  for (const s of accepted) {
+    try {
+      const pId = Number(state.psychologistId);
+      const supId = Number(s.supervisor?.id ?? s.supervisorId);
+
+      if (!pId || !supId) {
+        console.warn("IDs inválidos para conversa:", { pId, supId, s });
+        continue;
+      }
+
+      // Cria ou retorna a conversa existente (via query string, sem body)
+      const conv = await ConversationsService.between(pId, supId, state.token);
+      const conversaId = conv.id;
+
+      // Busca mensagens dessa conversa
+      const msgs = await MessagesService.listByConversation(conversaId, state.token);
+      const last = msgs.at(-1);
+
+      convs.push({
+        peerId: supId,
+        conversaId,
+        name: s.supervisor?.nome || `Supervisor ${supId}`,
+        lastMessage: (last?.texto ?? last?.conteudo) || "Conversa iniciada",
+        timestamp: last?.dataEnvio || new Date().toISOString(),
+        unread: false,
+        messages: msgs,
+      });
+    } catch (err) {
+      console.warn("Falha ao carregar conversa:", err);
+      convs.push({
+        peerId: Number(s.supervisorId),
+        conversaId: null,
+        name: s.supervisor?.nome || `Supervisor ${s.supervisorId}`,
+        lastMessage: "Sem mensagens",
+        timestamp: new Date().toISOString(),
+        unread: false,
+        messages: [],
+      });
+    }
+  }
+
   state.conversations = convs;
   renderConversationsList();
 }
+
+
 
 function renderConversationsList() {
   const empty = qs("conversations-empty-state");
@@ -138,33 +185,41 @@ function renderConversationsList() {
 
 async function openConversation(item) {
   state.currentPeerId = item.peerId;
+  state.currentConversationId = item.conversaId;
   qs("chat-header").innerText = item.name;
   qs("chat-input-area").style.display = "flex";
-  const msgs = await MessagesService.thread(state.psychologistId, item.peerId, state.token);
+
+  if (!state.currentConversationId) {
+    renderThread(qs("chat-messages"), [], state.psychologistId);
+    return;
+  }
+
+  const msgs = await MessagesService.listByConversation(state.currentConversationId, state.token);
+  // renderThread deve saber lidar com mensagens que têm campo 'texto'
   renderThread(qs("chat-messages"), msgs, state.psychologistId);
   startPolling();
 }
 
+
 async function sendMessage() {
   const input = qs("inputMensagem");
   const text = input.value.trim();
-  if (!text || !state.currentPeerId) return;
-  await MessagesService.send({
-    remetenteId: state.psychologistId,
-    destinatarioId: state.currentPeerId,
-    conteudo: text
-  }, state.token);
+  if (!text || !state.currentConversationId) return;
+
+  await MessagesService.send(text, state.currentConversationId, state.token);
   input.value = "";
-  const msgs = await MessagesService.thread(state.psychologistId, state.currentPeerId, state.token);
+
+  const msgs = await MessagesService.listByConversation(state.currentConversationId, state.token);
   renderThread(qs("chat-messages"), msgs, state.psychologistId);
 }
+
 
 function startPolling() {
   stopPolling();
   state.polling = setInterval(async () => {
     if (!state.currentPeerId) return;
-    const msgs = await MessagesService.thread(state.psychologistId, state.currentPeerId, state.token);
-    renderThread(qs("chat-messages"), msgs, state.psychologistId);
+   const msgs = await MessagesService.listByConversation(state.currentConversationId, state.token);
+  renderThread(qs("chat-messages"), msgs, state.psychologistId);
   }, 5000);
 }
 function stopPolling() { if (state.polling) clearInterval(state.polling); }
