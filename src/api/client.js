@@ -37,3 +37,18 @@ export async function post(path, body, token) {
   });
   return handleResponse(res);
 }
+
+
+// Arquivo: /src/api/client.js
+
+// ... (suas funções existentes: get, post, put)
+
+// ADICIONE ESTA NOVA FUNÇÃO
+export async function patch(path, body, token) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    method: "PATCH", // A principal mudança está aqui
+    headers: makeHeaders(token),
+    body: body ? JSON.stringify(body) : undefined
+  });
+  return handleResponse(res);
+}

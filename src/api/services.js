@@ -1,6 +1,5 @@
-// src/api/services.js
-import { get, post } from "./client.js";
 
+import { get, post, patch } from "./client.js";
 // Usuários
 export const UsersService = {
   listSupervisors: (token) => get("/supervisores", token),
@@ -25,5 +24,35 @@ export const ConversationsService = {
 // Mensagens — aderente à doc (por conversaId)
 export const MessagesService = {
   listByConversation: (conversaId, token) => get(`/mensagens/conversa/${conversaId}`, token),
-  send: (texto, conversaId, token) => post("/mensagens", { texto, conversa: { id: conversaId } }, token),
+  send: (texto, conversaId, user, token) => {
+    const payload = {
+      conteudo: texto, // Nome correto do campo: "conteudo"
+      conversa: { id: conversaId },
+      remetenteTipo: user.tipoUsuario, // Informação do remetente
+      remetenteId: user.id             // Informação do remetente
+    };
+    return post("/mensagens", payload, token);
+  },
 };
+
+
+
+// 2. Adicione o método 'patchPsicologo' ao ProfileService
+export const ProfileService = {
+  // --- Supervisor ---
+  getSupervisor: (id, token) => get(`/supervisores/${id}`, token),
+  updateSupervisor: (id, payload, token) => put(`/supervisores/${id}`, payload, token),
+  patchSupervisor: (id, payload, token) => patch(`/supervisores/${id}`, payload, token),
+
+  // --- Psicólogo ---
+  getPsicologo: (id, token) => get(`/psicologos/${id}`, token),
+  updatePsicologo: (id, payload, token) => put(`/psicologos/${id}`, payload, token), // Mantemos o PUT caso precise
+  patchPsicologo: (id, payload, token) => patch(`/psicologos/${id}`, payload, token), // NOVO MÉTODO PARA PATCH
+};
+
+
+
+
+
+
+

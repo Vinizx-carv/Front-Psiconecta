@@ -258,7 +258,7 @@
       <form id="cadastroForm">
         <input type="text" id="nome" placeholder="Nome completo" required />
         <input type="email" id="email" placeholder="Email" required />
-        <input type="text" id="crp" placeholder="CRP" required />
+        <input type="text" id="crp" placeholder="CRP"  />
         <input type="password" id="senha" placeholder="Senha" required />
         <label for="tipoUsuario">Sou:</label>
         <select id="tipoUsuario">
@@ -276,16 +276,17 @@
       const form = document.getElementById("cadastroForm");
 
       const tipoUsuarioSelect = document.getElementById("tipoUsuario");
-      const crpContainer = document.getElementById("crpContainer");
+      const crpInput = document.getElementById("crp"); // Pega o input do CRP diretamente
 
       tipoUsuarioSelect.addEventListener("change", () => {
-        if (tipoUsuarioSelect.value === "psicologo") {
-          crp.style.display = "none";
-          document.getElementById("crp").value = "";
-        } else {
-          crp.style.display = "block";
-        }
-      });
+    if (tipoUsuarioSelect.value === "psicologo") {
+      crpInput.style.display = "none"; // Usa a variável correta
+      crpInput.value = "";             // Usa a variável correta
+    } else {
+      crpInput.style.display = "block"; // Usa a variável correta
+    }
+});
+
 
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -296,10 +297,16 @@
         const senha = document.getElementById("senha").value.trim();
         const tipoUsuario = document.getElementById("tipoUsuario").value; // "psicologo" | "supervisor"
 
-        if (!nome || !email || !crp || !senha) {
-          alert("Por favor, preencha todos os campos.");
-          return;
-        }
+        if (!nome || !email || !senha) {
+    alert("Por favor, preencha nome, email e senha.");
+    return;
+}
+// Valida o CRP apenas se o tipo for "supervisor"
+if (tipoUsuario === "supervisor" && !crp) {
+    alert("Por favor, preencha o campo CRP para o supervisor.");
+    return;
+}
+
 
         // Escolhe o endpoint conforme o tipo
         const path =
@@ -317,7 +324,7 @@
           // Exemplos de campos opcionais; inclua inputs no form se quiser coletá-los já aqui
           dataNascimento: null,
           fotoPerfil: null,
-          areaDesejada: "Clínica Geral",
+          areaDesejada: null,
           telefone: null,
           cidade: null,
           uf: null,
