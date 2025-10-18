@@ -1,5 +1,5 @@
 
-import { get, post, patch } from "./client.js";
+import { get, post, put} from "./client.js";
 // Usuários
 export const UsersService = {
   listSupervisors: (token) => get("/supervisores", token),
@@ -37,17 +37,17 @@ export const MessagesService = {
 
 
 
-// 2. Adicione o método 'patchPsicologo' ao ProfileService
 export const ProfileService = {
   // --- Supervisor ---
   getSupervisor: (id, token) => get(`/supervisores/${id}`, token),
   updateSupervisor: (id, payload, token) => put(`/supervisores/${id}`, payload, token),
-  patchSupervisor: (id, payload, token) => patch(`/supervisores/${id}`, payload, token),
 
   // --- Psicólogo ---
+  // ...
+  // --- Psicólogo ---
   getPsicologo: (id, token) => get(`/psicologos/${id}`, token),
-  updatePsicologo: (id, payload, token) => put(`/psicologos/${id}`, payload, token), // Mantemos o PUT caso precise
-  patchPsicologo: (id, payload, token) => patch(`/psicologos/${id}`, payload, token), // NOVO MÉTODO PARA PATCH
+  updatePsicologo: (id, payload, token) => put(`/psicologos/${id}`, payload, token),
+
 };
 
 

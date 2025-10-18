@@ -61,30 +61,30 @@ async function loadSupervisorProfile() {
         profileCard.innerHTML = `<p>Erro ao carregar perfil. Verifique o console para mais detalhes.</p>`;
     }
 }
+// Arquivo: /src/pages/supervisor/index.js
 
 async function handleSupervisorSave(updatedDataFromForm) {
     const profileCard = document.querySelector('#perfil-tab .profile-card');
     const currentData = supervisorProfileData;
 
-    const payload = {};
-    for (const key in updatedDataFromForm) {
-        if (currentData.hasOwnProperty(key) && currentData[key] !== updatedDataFromForm[key]) {
-            payload[key] = updatedDataFromForm[key];
-        }
-    }
+    // Mescla os dados atuais com os novos para criar o payload completo
+    const completePayload = { ...currentData, ...updatedDataFromForm };
 
-    if (Object.keys(payload).length === 0) {
-        alert("Nenhuma alteração foi feita.");
-        handleSupervisorCancel();
-        return;
-    }
-
-    console.log("Enviando apenas os campos alterados via PATCH:", payload);
+    // Remove campos que não devem ser enviados na atualização
+    delete completePayload.id;
+    delete completePayload.senha;
+    
+    console.log("Enviando payload completo via PUT:", completePayload);
 
     try {
-        const result = await ProfileService.patchSupervisor(state.supervisorId, payload, state.token);
-        supervisorProfileData = { ...currentData, ...result };
+        // AQUI ESTÁ A CORREÇÃO:
+        // Trocamos patchSupervisor por updateSupervisor
+        const result = await ProfileService.updateSupervisor(state.supervisorId, completePayload, state.token);
+        
+        // Atualiza os dados locais com a resposta do servidor
+        supervisorProfileData = result;
 
+        // Re-renderiza o perfil para mostrar as novas informações
         const onEdit = () => renderEditForm(profileCard, supervisorProfileData, supervisorConfig, handleSupervisorSave, handleSupervisorCancel);
         renderProfileView(profileCard, supervisorProfileData, supervisorConfig, onEdit);
 
@@ -94,6 +94,7 @@ async function handleSupervisorSave(updatedDataFromForm) {
         alert(`Não foi possível salvar as alterações: ${error.message}`);
     }
 }
+
 
 function handleSupervisorCancel() {
     const profileCard = document.querySelector('#perfil-tab .profile-card');
@@ -244,9 +245,7 @@ async function openConversation(item) {
 renderThread(qs("chat-messages"), msgs, state.supervisorId);
   startPolling();
 }
-// Arquivo: /src/pages/supervisor/index.js
 
-// Arquivo: /src/pages/supervisor/index.js
 
 async function sendMessage() {
     const input = qs("inputMensagem");

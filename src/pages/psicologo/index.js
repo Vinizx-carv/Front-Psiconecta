@@ -307,41 +307,50 @@ async function handleProfileSave(updatedDataFromForm) {
     const profileCard = document.querySelector('#profile-tab .profile-card');
     const currentData = psicologoProfileData;
 
-    // 1. Cria um objeto 'payload' apenas com os campos que realmente mudaram
-    const payload = {};
-    for (const key in updatedDataFromForm) {
-        // Compara o valor do formulário com o valor atual e adiciona ao payload se for diferente
-        if (currentData.hasOwnProperty(key) && currentData[key] !== updatedDataFromForm[key]) {
-            payload[key] = updatedDataFromForm[key];
+    // --- INÍCIO DA CORREÇÃO DE FORMATO DA DATA ---
+
+    // 1. Cria uma cópia dos dados atualizados para poder modificá-los
+    const processedData = { ...updatedDataFromForm };
+
+    // 2. Verifica se o campo 'dataNascimento' foi alterado e o converte
+    if (processedData.dataNascimento) {
+        // O input type="date" retorna "YYYY-MM-DD", o que é perfeito.
+        // O problema pode ser se o formato estiver sendo enviado como DD-MM-YYYY.
+        // Esta lógica garante a conversão para o formato que a API precisa.
+        const parts = processedData.dataNascimento.split('');
+        if (parts.length === 3 && parts[0].length === 2) { // Detecta formato DD-MM-YYYY
+            // Converte de [DD, MM, YYYY] para "YYYY-MM-DD"
+            processedData.dataNascimento = `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
     }
+    
+    // --- FIM DA CORREÇÃO ---
 
-    // 2. Se nenhum campo foi alterado, apenas informa o usuário e sai da função
-    if (Object.keys(payload).length === 0) {
-        alert("Nenhuma alteração foi feita.");
-        handleProfileCancel(); // Volta para a tela de visualização
-        return;
-    }
+    // Mescla os dados para criar o objeto completo
+    const completePayload = { ...currentData, ...processedData };
 
-    console.log("Enviando apenas os campos alterados via PATCH:", payload);
+    delete completePayload.id;
+    delete completePayload.senha;
+
+    console.log("Payload final que será enviado via PUT:", JSON.stringify(completePayload, null, 2));
 
     try {
-        // 3. Usa o novo serviço de PATCH para enviar apenas o payload parcial
-        const result = await ProfileService.patchPsicologo(state.psychologistId, payload, state.token);
+        const result = await ProfileService.updatePsicologo(state.psychologistId, completePayload, state.token);
 
-        // 4. Atualiza o estado local com a resposta do servidor
-        psicologoProfileData = { ...currentData, ...result };
+        psicologoProfileData = result;
 
-        // Re-renderiza o perfil para mostrar os dados atualizados
         const onEdit = () => renderEditForm(profileCard, psicologoProfileData, psicologoConfig, handleProfileSave, handleProfileCancel);
         renderProfileView(profileCard, psicologoProfileData, psicologoConfig, onEdit);
         
         alert('Perfil atualizado com sucesso!');
     } catch (error) {
         console.error('Falha ao salvar o perfil do psicólogo:', error);
-        alert(`Não foi possível salvar as alterações: ${error.message}`);
+        const errorMessage = error.message || "Verifique os dados e tente novamente.";
+        alert(`Não foi possível salvar as alterações: ${errorMessage}`);
     }
 }
+
+
 
 
 
