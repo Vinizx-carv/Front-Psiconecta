@@ -127,19 +127,18 @@ function renderMyRequests(list) {
 }
 
 
-
-
-async function loadAndRenderContacts() {
-
-  console.log("1. Iniciando loadAndRenderContacts...");
+async function loadAndRenderContacts(requests) {
+  console.log("1. Iniciando loadAndRenderContacts com a lista de solicitações fornecida:", requests);
 
   try {
-    const acceptedRequests = state.myRequests.filter(req => req.status === "ACEITA");
-    console.log("2. Solicitações ACEITAS encontradas:", acceptedRequests);
+    const acceptedRequests = requests.filter(req => req.status && req.status.toUpperCase() === "ACEITA");
+    
+    console.log("2. Solicitações ACEITAS encontradas (após correção):", acceptedRequests);
 
     if (acceptedRequests.length === 0) {
       qs("conversations-empty-state").style.display = "block";
       qs("chat-container").style.display = "none";
+      console.log("Nenhuma solicitação 'ACEITA' encontrada. Encerrando a renderização de contatos.");
       return;
     }
 
@@ -156,26 +155,19 @@ async function loadAndRenderContacts() {
       if (!convData?.id) return null;
 
       const messagesResponse = await MessagesService.listByConversation(convData.id, state.token);
-      console.log(`5.${index}. Resposta CRUA da API de mensagens (messagesResponse):`, messagesResponse);
-
-      const messages = messagesResponse.content || messagesResponse;
+      const messages = messagesResponse.content || messagesResponse || [];
       console.log(`6.${index}. Array de mensagens processado (messages):`, messages);
 
       const lastMessageObj = messages.at(-1);
-      console.log(`7.${index}. Objeto da última mensagem (lastMessageObj):`, lastMessageObj);
-
       const lastMessageText = lastMessageObj?.conteudo || lastMessageObj?.texto || "Nenhuma mensagem.";
-      console.log(`8.${index}. Texto final da última mensagem (lastMessageText):`, lastMessageText);
       
-      const conversationObject = {
+      return {
         id: convData.id,
         name: supervisor.nome,
         lastMessage: lastMessageText, 
         timestamp: lastMessageObj?.dataEnvio,
         messages: messages
       };
-
-      return conversationObject;
     });
 
     const conversations = (await Promise.all(conversationPromises)).filter(Boolean);
@@ -189,6 +181,7 @@ async function loadAndRenderContacts() {
     console.error("ERRO GERAL em loadAndRenderContacts:", error);
   }
 }
+
 
 
 function openConversation(conversationId) {
@@ -391,10 +384,24 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (tabId === "requests") {
         await loadMyRequests();
       }
+
       if (tabId === "conversations") {
-        await loadMyRequests(); 
-        await loadAndRenderContacts();
+        console.log("Aba 'conversations' ativada. Buscando solicitações mais recentes...");
+        
+        try {
+          const myLatestRequests = await RequestsService.byPsychologist(state.psychologistId, state.token);
+          console.log("API retornou as seguintes solicitações:", myLatestRequests);
+
+          state.myRequests = myLatestRequests;
+          
+  
+          await loadAndRenderContacts(myLatestRequests);
+
+        } catch (error) {
+          console.error("Falha ao buscar as solicitações para a aba de conversas:", error);
+        }
       }
+
       if (tabId === "profile") {
         await loadPsicologoProfile();
       }

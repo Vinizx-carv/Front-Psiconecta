@@ -29,21 +29,59 @@ export async function get(path, token) {
 }
 
 
-export async function post(path, body, token) {
+export async function post(endpoint, body, token) {
+  const url = `${API_BASE}${endpoint}`; 
+  
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+
+      ...(token && { 'Authorization': `Bearer ${token}` }), 
+    },
+    ...(body && { body: JSON.stringify(body) }),
+  };
+
+  try {
+    const response = await fetch(url, options);
+
+
+    const contentType = response.headers.get("content-type");
+    
+    if (!response.ok) {
+        let error = { message: `Erro HTTP: ${response.status} ${response.statusText}` };
+        if (contentType && contentType.includes("application/json")) {
+            error = await response.json();
+        }
+        throw new Error(error.message || 'Ocorreu um erro na requisição.');
+    }
+
+
+    if (contentType && contentType.includes("application/json")) {
+        return await response.json();
+    } else {
+        return { success: true };
+    }
+
+
+  } catch (error) {
+    console.error(`Falha na requisição POST para ${endpoint}:`, error);
+    throw error; 
+  }
+}
+
+
+export async function put(path, body, token) {
   const res = await fetch(`${API_BASE}${path}`, {
-    method: "POST",
+    method: "PUT",
     headers: makeHeaders(token),
     body: body ? JSON.stringify(body) : undefined
   });
   return handleResponse(res);
 }
 
-export async function put(path, body, token) {
-  const res = await fetch(`${API_BASE}${path}`, {
-    method: "PUT", // A única diferença principal é o método
-    headers: makeHeaders(token),
-    body: body ? JSON.stringify(body) : undefined
-  });
-  return handleResponse(res);
-}
-// ========
+
+
+
+
+
