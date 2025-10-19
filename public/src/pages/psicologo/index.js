@@ -117,7 +117,6 @@ function renderMyRequests(list) {
 
   list.forEach(s => {
     const card = document.createElement("div");
-    // Use a nova classe 'request-card'
     card.className = "request-card"; 
     card.innerHTML = `
       <h3>Supervisor: ${s.supervisor?.nome || `ID ${s.supervisorId}`}</h3>
@@ -128,12 +127,10 @@ function renderMyRequests(list) {
 }
 
 
-// ------------------- FUNÇÕES DA ABA "CONVERSAS" (CHAT) -------------------
 
-// NOVO CÓDIGO PARA /src/pages/psicologo/index.js -> loadAndRenderContacts
 
 async function loadAndRenderContacts() {
-  // Log para garantir que a função está sendo chamada
+
   console.log("1. Iniciando loadAndRenderContacts...");
 
   try {
@@ -299,7 +296,7 @@ async function handleProfileSave(updatedDataFromForm) {
 
     if (processedData.dataNascimento) {
         const parts = processedData.dataNascimento.split('');
-        if (parts.length === 3 && parts[0].length === 2) { // Detecta formato DD-MM-YYYY
+        if (parts.length === 3 && parts[0].length === 2) { 
             processedData.dataNascimento = `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
     }
@@ -348,6 +345,31 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   state.token = user.token;
   state.psychologistId = user.id;
+
+  const sidebarToggle = document.getElementById('sidebar-toggle');
+  const sidebar = document.querySelector('.sidebar');
+
+  if (sidebarToggle && sidebar) {
+    sidebarToggle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        sidebar.classList.toggle('active');
+    });
+
+    sidebar.addEventListener('click', (event) => {
+        event.stopPropagation();
+    });
+
+    document.addEventListener('click', (event) => {
+        if (sidebar.classList.contains('active') && !sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+            sidebar.classList.remove('active');
+        }
+    });
+  }
+
+  qs("send-btn").addEventListener("click", sendMessage);
+  qs("inputMensagem").addEventListener("keypress", e => { if (e.key === 'Enter') sendMessage(); });
+  qs("logout-btn").addEventListener("click", () => { clearSession(); location.href = "index.html"; });
+  qs("supervisors-grid").addEventListener("click", handleRequestSupervisor);
 
   qs("send-btn").addEventListener("click", sendMessage);
   qs("inputMensagem").addEventListener("keypress", e => { if (e.key === 'Enter') sendMessage(); });

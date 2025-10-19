@@ -162,7 +162,6 @@
         text-decoration: underline;
       }
 
-      /* Efeito de brilho sutil no container */
       .form-container::before {
         content: "";
         position: absolute;
@@ -179,7 +178,6 @@
         border-radius: 20px 20px 0 0;
       }
 
-      /* Media Queries para Responsividade */
       @media (max-width: 768px) {
         body {
           padding: 15px;
@@ -278,7 +276,7 @@
         }
       }
 
-      /* Media Query para telas grandes */
+   
       @media (min-width: 1200px) {
         .form-container {
           max-width: 650px;
@@ -360,35 +358,31 @@
               throw new Error("Resposta do servidor inválida.");
             }
 
-            // Trata erros HTTP com mensagens mais claras
+
             if (!response.ok) {
               const mensagemErro =
                 data?.message || data?.erro || "Email ou senha incorretos.";
               throw new Error(mensagemErro);
             }
 
-            // Login bem-sucedido
+
             console.log("Login realizado com sucesso:", data);
             localStorage.setItem("usuarioLogado", JSON.stringify(data));
 
-            // Mensagem visual temporária (pode ser substituída por modal futuramente)
             button.innerHTML = "Entrando... ✅";
 
-            // Redirecionamento conforme o tipo de usuário
             setTimeout(() => {
               if (data.tipoUsuario === "supervisor") {
                 window.location.href = "dashboard-sup.html";
               } else {
                 window.location.href = "dashboard-psi.html";
               }
-            }, 800); // pequena pausa para UX
+            }, 800); 
           } catch (error) {
             console.error("Erro no login:", error);
 
-            // Exibe erro amigável
             alert("⚠️ Não foi possível fazer login:\n" + error.message);
           } finally {
-            // Restaura o botão (caso o login falhe)
             button.disabled = false;
             button.innerHTML = "Entrar";
           }
