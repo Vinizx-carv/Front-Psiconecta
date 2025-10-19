@@ -364,6 +364,12 @@ document.addEventListener("DOMContentLoaded", async () => {
             sidebar.classList.remove('active');
         }
     });
+    const navButtons = sidebar.querySelectorAll('.nav-button');
+    navButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+        });
+    });
   }
 
   qs("send-btn").addEventListener("click", sendMessage);
