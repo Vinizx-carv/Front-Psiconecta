@@ -83,56 +83,12 @@ body {
 /* Responsivo base */
 @media (max-width: 768px) {
   .sidebar { transform: translateX(-100%); }
-  .sidebar.open { transform: translateX(0); }
+  .sidebar.active { transform: translateX(0); }
   .main-content { margin-left: 0; }
   .sidebar-toggle { display: block; }
   .content { padding: 16px; }
   .page-header h1 { font-size: 24px; }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* =================================================================
-   ESTILOS PARA O CARD DE PERFIL E FORMULÁRIO DE EDIÇÃO
-   ================================================================= */
-
-/* --- Card de Visualização do Perfil --- */
-
 .profile-card {
   background: #ffffff;
   border-radius: 12px;
@@ -328,4 +284,91 @@ body {
   .edit-profile-form .form-actions button {
       width: 100%;
   }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Adicione este CSS ao seu arquivo de estilos */
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  margin-top: 16px;
+}
+
+.calendar-cell {
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 8px;
+  text-align: center;
+  font-size: 14px;
+  min-height: 80px;
+  transition: background-color 0.2s;
+  cursor: pointer;
+}
+
+.calendar-cell:not(.empty):hover {
+  background-color: #eff6ff;
+}
+
+/* Célula para dias fora do mês atual */
+.calendar-cell.empty {
+  background-color: transparent;
+  border: none;
+  cursor: default;
+}
+
+/* Marcador para dias com eventos */
+.calendar-cell.has-event {
+  font-weight: bold;
+  background-color: var(--primary-100);
+  border: 1px solid var(--primary);
+}
+
+/* Dia atual */
+.calendar-cell.today {
+  background-color: var(--primary);
+  color: #fff;
+  font-weight: bold;
+}
+
+/* Header com os dias da semana */
+.calendar-day-header {
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+  padding-bottom: 8px;
+}
+
+/* Estilos para a lista de compromissos */
+.compromisso-item {
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+}
+.compromisso-item:last-child {
+  border-bottom: none;
+}
+.compromisso-item p {
+  margin: 0;
+  font-size: 14px;
+}
+.compromisso-item .compromisso-title {
+  font-weight: 500;
+  color: var(--text);
+}
+.compromisso-item .compromisso-time {
+  color: var(--muted);
+  font-size: 13px;
 }

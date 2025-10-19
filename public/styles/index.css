@@ -359,14 +359,6 @@ body {
   animation-delay: 0.3s;
 }
 
-/* Estados de foco para acessibilidade */
-.btn:focus,
-.nav-link:focus {
-  outline: 2px solid var(--primary-blue);
-  outline-offset: 2px;
-}
-
-/* Scroll suave */
 html {
   scroll-behavior: smooth;
 }
@@ -782,17 +774,6 @@ background-size: cover;  color: white;
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 

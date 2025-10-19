@@ -101,6 +101,117 @@ function handleSupervisorCancel() {
     const onEdit = () => renderEditForm(profileCard, supervisorProfileData, supervisorConfig, handleSupervisorSave, handleSupervisorCancel);
     renderProfileView(profileCard, supervisorProfileData, supervisorConfig, onEdit);
 }
+// Adicione esta nova seção ao seu arquivo /src/pages/supervisor/index.js
+
+// ==========================================================
+// =========== FUNÇÕES PARA A ABA DE AGENDA =================
+// ==========================================================
+
+// Estado para o calendário
+let agendaState = {
+    currentDate: new Date(),
+    compromissos: [ // Dados de exemplo. Idealmente, viriam da sua API.
+        { date: '2025-10-20T14:00:00', title: 'Supervisão com Dr. Carlos' },
+        { date: '2025-10-22T10:00:00', title: 'Reunião de Alinhamento' },
+        { date: '2025-11-05T11:30:00', title: 'Supervisão com Ana P.' },
+    ]
+};
+
+function initializeAgenda() {
+    const prevBtn = qs('prev-month');
+    const nextBtn = qs('next-month');
+    
+    if (prevBtn && nextBtn) {
+        prevBtn.onclick = () => {
+            agendaState.currentDate.setMonth(agendaState.currentDate.getMonth() - 1);
+            renderCalendar();
+        };
+
+        nextBtn.onclick = () => {
+            agendaState.currentDate.setMonth(agendaState.currentDate.getMonth() + 1);
+            renderCalendar();
+        };
+    }
+
+    renderCalendar();
+    renderCompromissos();
+}
+
+function renderCalendar() {
+    const calendarGrid = qs('calendar-grid');
+    const currentMonthSpan = qs('current-month');
+    if (!calendarGrid || !currentMonthSpan) return;
+
+    const date = agendaState.currentDate;
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    currentMonthSpan.textContent = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }).format(date);
+    calendarGrid.innerHTML = '';
+
+    // Adiciona cabeçalho dos dias da semana
+    ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].forEach(day => {
+        calendarGrid.innerHTML += `<div class="calendar-day-header">${day}</div>`;
+    });
+
+    const firstDayOfMonth = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+    for (let i = 0; i < firstDayOfMonth; i++) {
+        calendarGrid.innerHTML += '<div class="calendar-cell empty"></div>';
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const cellDate = new Date(year, month, day);
+        const cell = document.createElement('div');
+        cell.className = 'calendar-cell';
+        cell.textContent = day;
+
+        // Marca eventos
+        const hasEvent = agendaState.compromissos.some(c => new Date(c.date).toDateString() === cellDate.toDateString());
+        if (hasEvent) {
+            cell.classList.add('has-event');
+        }
+
+        // Marca o dia atual
+        if (cellDate.toDateString() === new Date().toDateString()) {
+            cell.classList.add('today');
+        }
+
+        calendarGrid.appendChild(cell);
+    }
+}
+
+function renderCompromissos() {
+    const container = qs('proximos-compromissos');
+    if (!container) return;
+    
+    container.innerHTML = '';
+    const hoje = new Date();
+    
+    const proximos = agendaState.compromissos
+        .filter(c => new Date(c.date) >= hoje)
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .slice(0, 5); // Mostra os próximos 5
+
+    if (proximos.length === 0) {
+        container.innerHTML = '<p>Nenhum compromisso futuro.</p>';
+        return;
+    }
+
+    proximos.forEach(c => {
+        const date = new Date(c.date);
+        const dia = new Intl.DateTimeFormat('pt-BR', { dateStyle: 'full' }).format(date);
+        const hora = new Intl.DateTimeFormat('pt-BR', { timeStyle: 'short' }).format(date);
+
+        container.innerHTML += `
+            <div class="compromisso-item">
+                <p class="compromisso-title">${c.title}</p>
+                <p class="compromisso-time">${dia} às ${hora}</p>
+            </div>
+        `;
+    });
+}
 
 // ==========================================================
 // =========== SUAS FUNÇÕES EXISTENTES (SEM MUDANÇAS) ========
@@ -116,22 +227,34 @@ async function loadRequests() {
 async function loadPsychologists() {
   state.psychologists = await UsersService.listPsychologists(state.token);
 }
+
 function renderRequests() {
   const container = qs("solicitacoes-list");
   const empty = qs("solicitacoes-empty-state");
   container.innerHTML = "";
-  if (!state.requests.length) { empty.style.display = "block"; return; }
+
+  if (!state.requests.length) {
+    empty.style.display = "block";
+    return;
+  }
   empty.style.display = "none";
+
   state.requests.forEach(s => {
-    const p = state.psychologists.find(x => x.id === s.psicologoId);
+    const p = state.psychologists.find(x => String(x.id) === String(s.psicologoId));
+    
     const nome = p?.nome || "Psicólogo desconhecido";
     const area = p?.areaDesejada || p?.area || "Área não informada";
+    
     const card = document.createElement("div");
     card.className = "solicitacao-card";
+    card.id = `solicitacao-${s.id}`;
+
+    const isPendente = s.status && s.status.toUpperCase() === "PENDENTE";
+
     card.innerHTML = `
       <div class="solicitacao-header">
         <div class="solicitacao-info">
-          <div class="solicitacao-avatar">${nome.split(" ").map(n=>n[0]).join("")}</div>
+          <div class="solicitacao-avatar">${nome.split(" ").map(n => n[0]).join("")}</div>
           <div class="solicitacao-details">
             <h3>${nome}</h3>
             <p>${area}</p>
@@ -139,8 +262,8 @@ function renderRequests() {
           </div>
         </div>
         <div class="solicitacao-actions">
-          <span class="status-badge status-${s.status.toLowerCase()}">${s.status}</span>
-          ${s.status === "PENDENTE" ? `
+          <span class="status-badge status-${(s.status || '').toLowerCase()}">${s.status || 'N/A'}</span>
+          ${isPendente ? `
             <button class="btn-primary" data-act="accept" data-id="${s.id}">Aceitar</button>
             <button class="btn-outline" data-act="reject" data-id="${s.id}">Recusar</button>
           ` : ""}
@@ -149,76 +272,144 @@ function renderRequests() {
     `;
     container.appendChild(card);
   });
+
+  // --- LÓGICA DE CLIQUE CORRIGIDA E COM LOADING ---
   container.onclick = async (e) => {
     const btn = e.target.closest("button[data-act]");
     if (!btn) return;
+
     const id = btn.dataset.id;
     const act = btn.dataset.act;
+    const card = document.getElementById(`solicitacao-${id}`);
+    
+    // CORREÇÃO: Garante que a comparação do ID seja segura
+    const originalRequest = state.requests.find(r => String(r.id) === String(id));
+    
+    // CORREÇÃO: A verificação de status também deve ser insensível a maiúsculas/minúsculas
+    if (!originalRequest || !originalRequest.status || originalRequest.status.toUpperCase() !== 'PENDENTE') {
+      console.warn("Ação ignorada: solicitação não encontrada ou não está mais pendente.");
+      return;
+    }
+
+    // --- LÓGICA DE LOADING ---
+    const originalButtonHTML = btn.innerHTML;
+    btn.innerHTML = '<div class="loader"></div>';
+    btn.disabled = true;
+    const otherButton = act === 'accept' 
+      ? card.querySelector('button[data-act="reject"]') 
+      : card.querySelector('button[data-act="accept"]');
+    if(otherButton) otherButton.disabled = true;
+
+
+    const originalStatus = originalRequest.status;
+    const newStatus = act === 'accept' ? 'ACEITA' : 'RECUSADA';
+    
     try {
+      // 1. ATUALIZAÇÃO OTIMISTA (Acontece antes da API responder)
+      originalRequest.status = newStatus;
+      updateSummary();
+      
+      // 2. CHAMADA ASSÍNCRONA À API
       if (act === "accept") {
         await RequestsService.accept(id, state.token);
-        alert("Solicitação aceita com sucesso!");
+        console.log("Solicitação aceita com sucesso no servidor.");
         await loadConversations();
       } else if (act === "reject") {
         await RequestsService.reject(id, state.token);
-        alert("Solicitação recusada.");
+        console.log("Solicitação recusada com sucesso no servidor.");
       }
-      await loadRequests();
-      updateSummary();
+
+      // 3. ATUALIZAÇÃO FINAL DA UI EM CASO DE SUCESSO
+      const statusBadge = card.querySelector('.status-badge');
+      const actionsDiv = card.querySelector('.solicitacao-actions');
+      statusBadge.textContent = newStatus;
+      statusBadge.className = `status-badge status-${newStatus.toLowerCase()}`;
+      actionsDiv.querySelectorAll('button').forEach(b => b.remove());
+
     } catch (err) {
+      // 4. REVERSÃO EM CASO DE ERRO
       console.error("Erro ao processar solicitação:", err);
-      alert("Falha ao processar solicitação.");
+      alert("Falha ao processar solicitação. A interface será restaurada.");
+
+      originalRequest.status = originalStatus; // Reverte o estado
+      updateSummary(); // Reverte os contadores
+
+      // Restaura o botão que foi clicado
+      btn.innerHTML = originalButtonHTML;
+      btn.disabled = false;
+      if(otherButton) otherButton.disabled = false;
     }
   };
 }
+
+
 function updateSummary() {
   qs("supervisoes-count").textContent = state.requests.filter(x => x.status === "PENDENTE").length;
   qs("solicitacoes-count").textContent = state.requests.filter(x => x.status === "PENDENTE").length;
   qs("conversations-count").textContent = state.conversations.some(c => c.unread) ? "1" : "0";
 }
+
+// Substitua sua função loadConversations por esta:
+
+// Substitua sua função loadConversations por esta versão
+
 async function loadConversations() {
-  const accepted = (state.requests || []).filter(s => s.status === "ACEITA");
-  const convs = [];
-  for (const s of accepted) {
-    try {
-      const pId = Number(s.psicologo?.id ?? s.psicologoId);
-      const supId = Number(state.supervisorId);
-      if (!pId || !supId) {
-        console.warn("IDs inválidos para conversa (supervisor):", { pId, supId, s });
-        continue;
-      }
-      const conv = await ConversationsService.between(pId, supId, state.token);
-      const conversaId = conv.id;
-      const msgs = await MessagesService.listByConversation(conversaId, state.token);
-      const last = msgs.at(-1);
-      const peer = state.psychologists.find(x => x.id === pId);
-      convs.push({
-        peerId: pId,
-        conversaId,
-        name: peer?.nome || s.psicologo?.nome || `Psicólogo #${pId}`,
-        lastMessage: (last?.texto ?? last?.conteudo) || "Conversa iniciada",
-        timestamp: last?.dataEnvio || new Date().toISOString(),
-        unread: false,
-        messages: msgs,
-      });
-    } catch (err) {
-      console.warn("Falha ao carregar conversa (supervisor):", err);
-      const pId = Number(s.psicologo?.id ?? s.psicologoId);
-      const peer = state.psychologists.find(x => x.id === pId);
-      convs.push({
-        peerId: pId,
-        conversaId: null,
-        name: peer?.nome || s.psicologo?.nome || `Psicólogo #${pId}`,
-        lastMessage: "Sem mensagens",
-        timestamp: new Date().toISOString(),
-        unread: false,
-        messages: [],
-      });
+  try {
+    // === PASSO CRUCIAL ADICIONADO ===
+    // Garante que a lista de solicitações no estado está atualizada
+    // antes de tentar encontrar as conversas baseadas nela.
+    const reqs = await RequestsService.bySupervisor(state.supervisorId, state.token);
+    state.requests = reqs;
+
+    // Agora, prossiga com a lógica original, que filtra as solicitações aceitas
+    const accepted = (state.requests || []).filter(s => s.status && s.status.toUpperCase() === 'ACEITA');
+    
+    if (!accepted.length) {
+      // Se não houver solicitações aceitas, limpa a lista de conversas e sai
+      state.conversations = [];
+      renderConversationsList();
+      return;
     }
+
+    const convs = [];
+    for (const s of accepted) {
+        const pId = Number(s.psicologo?.id ?? s.psicologoId);
+        const supId = Number(state.supervisorId);
+
+        if (!pId || !supId) {
+            console.warn("IDs inválidos para criar conversa:", { pId, supId, s });
+            continue;
+        }
+
+        try {
+            const conv = await ConversationsService.between(pId, supId, state.token);
+            const msgs = await MessagesService.listByConversation(conv.id, state.token);
+            const last = msgs.at(-1);
+            const peer = state.psychologists.find(x => String(x.id) === String(pId));
+
+            convs.push({
+                peerId: pId,
+                conversaId: conv.id,
+                name: peer?.nome || `Psicólogo #${pId}`,
+                lastMessage: (last?.texto ?? last?.conteudo) || "Conversa iniciada",
+                timestamp: last?.dataEnvio || new Date().toISOString(),
+                unread: false,
+                messages: msgs,
+            });
+        } catch (err) {
+            console.warn(`Falha ao carregar detalhes da conversa para o psicólogo #${pId}`, err);
+        }
+    }
+    
+    state.conversations = convs;
+    renderConversationsList();
+
+  } catch (err) {
+    console.error("Falha fatal ao carregar conversas:", err);
   }
-  state.conversations = convs;
-  renderConversationsList();
 }
+
+
 function renderConversationsList() {
   const empty = qs("conversations-empty-state");
   const container = qs("chat-container");
@@ -327,7 +518,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     state.token = user.token || null;
     state.supervisorId = user.id;
 
-    // Conecta eventos globais
+    const sidebarToggle = document.getElementById('sidebar-toggle');
+    const sidebar = document.querySelector('.sidebar'); // Certifique-se que sua sidebar tem a classe 'sidebar'
+
+    if (sidebarToggle && sidebar) {
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('active');
+        });
+    }
+
+
+    document.addEventListener('click', function(event) {
+      // Verifica se a sidebar está ativa e se o clique não foi dentro da sidebar
+      const isClickInsideSidebar = sidebar.contains(event.target);
+      const isClickOnToggleButton = sidebarToggle.contains(event.target);
+
+      if (sidebar.classList.contains('active') && !isClickInsideSidebar && !isClickOnToggleButton) {
+          sidebar.classList.remove('active');
+      }
+  });
+
+  // Impede que cliques dentro da sidebar a fechem
+  sidebar.addEventListener('click', function(event) {
+      event.stopPropagation();
+  });
+
+    
+
     qs("inputMensagem").addEventListener("keypress", e => { if (e.key === "Enter") sendMessage(); });
     qs("send-btn")?.addEventListener("click", sendMessage);
     qs("logout-btn").addEventListener("click", () => {
@@ -339,11 +556,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const { switchTab } = mountTabs({
         onTab: async (tab) => {
             stopPolling();
-            if (tab === "agenda") { /* render agenda se houver */ }
-            if (tab === "solicitacoes") { await loadPsychologists(); await loadRequests(); }
+            await loadPsychologists(); 
+            if (tab === "agenda") {
+              initializeAgenda(); // <<< Adicione esta linha
+              updateSummary();    // <<< Atualiza os contadores
+           }if (tab === "solicitacoes") {  await loadRequests(); }
             if (tab === "conversations") {
-                await loadPsychologists();
-                await loadRequests();
+                
                 await loadConversations();
             }
             // ADICIONA A LÓGICA PARA A ABA DE PERFIL
@@ -352,6 +571,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }
     });
+    await loadRequests();   // <<< Garante que temos os dados para o resumo
+    updateSummary();  
 
     switchTab("agenda");
 });

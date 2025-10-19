@@ -1,7 +1,6 @@
 
 import { mountTabs } from "../../ui/tabs.js";
 import { getLoggedUser, clearSession } from "../../utils/storage.js";
-// ÚNICA importação de services.js, agora incluindo ProfileService
 import { 
   UsersService, 
   RequestsService, 
@@ -14,13 +13,12 @@ import { renderContacts, renderThread } from "../../ui/chat.js";
 import { renderProfileView, renderEditForm } from "../../ui/ProfileComponent.js";
 
 
-// ------------------- ESTADO GLOBAL E UTILITÁRIOS -------------------
 const state = {
   token: null,
   psychologistId: null,
-  supervisors: [], // Para a aba 'Procurar Supervisores'
-  myRequests: [],  // Para a aba 'Solicitações'
-  conversations: [], // Para a aba 'Conversas'
+  supervisors: [], 
+  myRequests: [],  
+  conversations: [], 
   activeConversationId: null,
   pollingInterval: null,
 };
@@ -29,7 +27,6 @@ function qs(id) {
   return document.getElementById(id);
 }
 
-// ------------------- FUNÇÕES DA ABA "PROCURAR SUPERVISORES" -------------------
 
 async function loadSupervisors() {
   state.supervisors = await UsersService.listSupervisors(state.token);
@@ -51,7 +48,7 @@ function renderSupervisors(items) {
     card.className = "supervisor-card";
     card.innerHTML = `
       <div class="supervisor-header">
-        <img src="${s.image || '../../assets/img/perfil-foto.svg'}" alt="" class="supervisor-photo">
+        <img src="${s.image || 'https://raw.githubusercontent.com/Vinizx-carv/Front-Psiconecta/9657e221a63752cc020d0d1b6e6c8609eb5ffdba/public/assets/img/perfil-foto.svg'}" alt="" class="supervisor-photo">
         <div class="supervisor-info">
           <h3 class="supervisor-name">${s.nome || "Sem nome"}</h3>
           <span class="supervisor-exp">${s.experience || ""}</span>
@@ -96,7 +93,6 @@ async function handleRequestSupervisor(e) {
 }
 
 
-// ------------------- FUNÇÕES DA ABA "SOLICITAÇÕES" -------------------
 
 async function loadMyRequests() {
   try {
@@ -162,7 +158,6 @@ async function loadAndRenderContacts() {
       console.log(`4.${index}. Dados da conversa (convData):`, convData);
       if (!convData?.id) return null;
 
-      // PONTO CRÍTICO: O que a API de mensagens está retornando?
       const messagesResponse = await MessagesService.listByConversation(convData.id, state.token);
       console.log(`5.${index}. Resposta CRUA da API de mensagens (messagesResponse):`, messagesResponse);
 
@@ -172,14 +167,13 @@ async function loadAndRenderContacts() {
       const lastMessageObj = messages.at(-1);
       console.log(`7.${index}. Objeto da última mensagem (lastMessageObj):`, lastMessageObj);
 
-      // LÓGICA CORRIGIDA E ROBUSTA
       const lastMessageText = lastMessageObj?.conteudo || lastMessageObj?.texto || "Nenhuma mensagem.";
       console.log(`8.${index}. Texto final da última mensagem (lastMessageText):`, lastMessageText);
       
       const conversationObject = {
         id: convData.id,
         name: supervisor.nome,
-        lastMessage: lastMessageText, // Usando a variável com a lógica correta
+        lastMessage: lastMessageText, 
         timestamp: lastMessageObj?.dataEnvio,
         messages: messages
       };
@@ -211,7 +205,6 @@ function openConversation(conversationId) {
   startPolling();
 }
 
-// /src/pages/psicologo/index.js
 
 async function sendMessage() {
   const input = qs("inputMensagem");
@@ -221,25 +214,21 @@ async function sendMessage() {
   const conversation = state.conversations.find(c => c.id === state.activeConversationId);
   if (!conversation) return;
 
-  // Lógica da mensagem otimista (continua igual)
   const optimisticMessage = { texto: text, remetente: { id: state.psychologistId }, dataEnvio: new Date().toISOString() };
   conversation.messages.push(optimisticMessage);
   renderThread(qs("chat-messages"), conversation.messages, state.psychologistId);
   input.value = "";
 
   try {
-    // AQUI ESTÁ A CORREÇÃO:
-    // Busque o usuário logado usando a função que já existe.
+ 
     const loggedUser = getLoggedUser(); 
     if (!loggedUser) {
       console.error("Usuário não encontrado. Impossível enviar mensagem.");
       return;
     }
 
-    // Chame o serviço passando o objeto de usuário completo.
     await MessagesService.send(text, state.activeConversationId, loggedUser, state.token);
     
-    // O resto da sua lógica de atualização...
     const response = await MessagesService.listByConversation(state.activeConversationId, state.token);
     conversation.messages = response.content || response;
     renderThread(qs("chat-messages"), conversation.messages, state.psychologistId);
@@ -270,14 +259,13 @@ function stopPolling() {
   if (state.pollingInterval) clearInterval(state.pollingInterval);
 }
 
-// Em /src/pages/psicologo/index.js
 
 const psicologoConfig = {
   roleName: 'Psicólogo Registrado',
   fields: {
 
 
-    // Novos campos
+
     dataNascimento: { label: 'Data de Nascimento', icon: 'fa-calendar-alt' },
     telefone: { label: 'Telefone', icon: 'fa-phone' },
     cidade: { label: 'Cidade', icon: 'fa-map-marker-alt' },
@@ -301,32 +289,21 @@ async function loadPsicologoProfile() {
   }
 }
 
-// Arquivo: /src/pages/psicologo/index.js
 
 async function handleProfileSave(updatedDataFromForm) {
     const profileCard = document.querySelector('#profile-tab .profile-card');
     const currentData = psicologoProfileData;
 
-    // --- INÍCIO DA CORREÇÃO DE FORMATO DA DATA ---
 
-    // 1. Cria uma cópia dos dados atualizados para poder modificá-los
     const processedData = { ...updatedDataFromForm };
 
-    // 2. Verifica se o campo 'dataNascimento' foi alterado e o converte
     if (processedData.dataNascimento) {
-        // O input type="date" retorna "YYYY-MM-DD", o que é perfeito.
-        // O problema pode ser se o formato estiver sendo enviado como DD-MM-YYYY.
-        // Esta lógica garante a conversão para o formato que a API precisa.
         const parts = processedData.dataNascimento.split('');
         if (parts.length === 3 && parts[0].length === 2) { // Detecta formato DD-MM-YYYY
-            // Converte de [DD, MM, YYYY] para "YYYY-MM-DD"
             processedData.dataNascimento = `${parts[2]}-${parts[1]}-${parts[0]}`;
         }
     }
     
-    // --- FIM DA CORREÇÃO ---
-
-    // Mescla os dados para criar o objeto completo
     const completePayload = { ...currentData, ...processedData };
 
     delete completePayload.id;
@@ -360,7 +337,6 @@ function handleProfileCancel() {
   renderProfileView(profileCard, psicologoProfileData, psicologoConfig, onEdit);
 }
 
-// ------------------- PONTO DE ENTRADA PRINCIPAL -------------------
 
 document.addEventListener("DOMContentLoaded", async () => {
   const user = getLoggedUser();
@@ -373,17 +349,14 @@ document.addEventListener("DOMContentLoaded", async () => {
   state.token = user.token;
   state.psychologistId = user.id;
 
-  // --- Conecta eventos globais ---
   qs("send-btn").addEventListener("click", sendMessage);
   qs("inputMensagem").addEventListener("keypress", e => { if (e.key === 'Enter') sendMessage(); });
   qs("logout-btn").addEventListener("click", () => { clearSession(); location.href = "index.html"; });
   qs("supervisors-grid").addEventListener("click", handleRequestSupervisor);
 
-  // --- Inicializa o sistema de abas ---
   const { switchTab } = mountTabs({
     onTab: async (tabId) => {
       stopPolling();
-      // --- LÓGICA PARA CADA ABA ---
       if (tabId === "search") {
         await loadSupervisors();
       }
@@ -391,7 +364,6 @@ document.addEventListener("DOMContentLoaded", async () => {
         await loadMyRequests();
       }
       if (tabId === "conversations") {
-        // A aba de conversas depende das solicitações aceitas
         await loadMyRequests(); 
         await loadAndRenderContacts();
       }
@@ -401,6 +373,5 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  // --- Define a aba inicial a ser carregada ---
-  switchTab("search"); // Começa na aba de procurar supervisores
+  switchTab("search"); 
 });
