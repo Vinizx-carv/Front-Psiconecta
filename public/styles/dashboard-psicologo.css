@@ -141,3 +141,22 @@
   font-size: 1.25rem;
   color: #334155;
 }
+
+
+.star-rating {
+  margin-top: 8px;
+  font-size: 1.3rem;    /* AUMENTA o tamanho das estrelas */
+  color: #f5b400;
+  display: flex;
+  align-items: center;
+}
+
+.star-rating .star-empty {
+  color: #ccc;
+}
+
+.star-rating span:last-child {
+  font-size: 0.85rem;   /* texto "4.5 / 5" menor que as estrelas */
+  margin-left: 6px;
+  color: #666;
+}

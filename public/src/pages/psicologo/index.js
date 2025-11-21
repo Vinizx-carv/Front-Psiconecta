@@ -42,8 +42,18 @@ function renderSupervisors(items) {
     return;
   }
   empty.style.display = "none";
-
   items.forEach(s => {
+    const rating = Number(s.rating) || 5; // ex: 4, 3.5, etc.
+    const fullStars = Math.floor(rating);
+    const hasHalf = rating % 1 >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+  
+    const starsHtml = `
+      ${"★".repeat(fullStars)}
+      ${hasHalf ? "☆" : ""}
+      ${"☆".repeat(emptyStars)}
+    `;
+  
     const card = document.createElement("div");
     card.className = "supervisor-card";
     card.innerHTML = `
@@ -54,14 +64,34 @@ function renderSupervisors(items) {
           <span class="supervisor-exp">${s.experience || ""}</span>
         </div>
       </div>
-      <div class="supervisor-tags">${(s.tags || ["Ansiedade", "Autoconhecimento"]).map(t => `<span class="tag">${t}</span>`).join("")}</div>
-      <p class="supervisor-description">${s.descricao || "Descrição não disponível"}</p>
+  
+      <div class="supervisor-tags">
+        ${(s.tags || ["Ansiedade", "Autoconhecimento"])
+          .map(t => `<span class="tag">${t}</span>`)
+          .join("")}
+      </div>
+  
+      <!-- CLASSIFICAÇÃO DE ESTRELAS (ABAIXO DAS TAGS) -->
+      <div class="star-rating">
+        <span>${starsHtml}</span>
+        <span style="margin-left:4px; font-size:0.8rem; color:#666;">
+          ${rating.toFixed(1)} / 5
+        </span>
+      </div>
+  
+      <p class="supervisor-description">
+        ${s.descricao || "Descrição não disponível"}
+      </p>
+  
       <div class="supervisor-footer">
-        <button class="btn-primary" data-request-id="${s.id}" data-name="${s.nome || 'Supervisor'}">Solicitar Supervisão</button>
+        <button class="btn-primary" data-request-id="${s.id}" data-name="${s.nome || 'Supervisor'}">
+          Solicitar Supervisão
+        </button>
       </div>
     `;
     grid.appendChild(card);
   });
+  
 }
 
 async function handleRequestSupervisor(e) {

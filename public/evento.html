@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Psiconecta - Eventos de Psicologia</title>
+  <link rel="stylesheet" href="styles/index.css">
+  <style>
+    :root {
+      --primary: #210cff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f5f5f7;
+      color: #111;
+    }
+
+    /* NAV TOP */
+    header.site-header {
+      background: #ffffff;
+      border-bottom: 1px solid #e2e2e8;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .navigation {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      font-weight: 600;
+      color: var(--primary);
+      font-size: 1.1rem;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      gap: 16px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .nav-link {
+      text-decoration: none;
+      color: #222;
+      font-size: 0.95rem;
+      padding: 6px 8px;
+      border-radius: 16px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .nav-link:hover {
+      background: rgba(33,12,255,0.06);
+      color: var(--primary);
+    }
+
+    /* HEADER DA PÁGINA */
+    .page-header {
+      background: var(--primary);
+      color: #fff;
+      padding: 28px 16px;
+    }
+
+    .page-header-inner {
+      max-width: 1024px;
+      margin: 0 auto;
+    }
+
+    .page-header h1 {
+      margin: 0;
+      font-size: 1.9rem;
+      letter-spacing: 0.02em;
+    }
+
+    .page-header p {
+      margin-top: 10px;
+      font-size: 1rem;
+      opacity: 0.9;
+    }
+
+    /* CONTEÚDO */
+    main {
+      max-width: 1424px;
+      margin: 24px auto 40px;
+      padding: 0 16px;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .filters input,
+    .filters select {
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid #d2d2de;
+      font-size: 0.95rem;
+      min-width: 190px;
+      background: #fff;
+    }
+
+    .filters button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      padding: 10px 18px;
+      cursor: pointer;
+      font-size: 0.95rem;
+    }
+
+    .filters button:hover {
+      opacity: 0.9;
+    }
+
+    /* CARDS */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+    }
+
+    @media (min-width: 768px) {
+      .cards-grid {
+        grid-template-columns: repeat(3, 1fr); /* 3 cards por linha */
+      }
+    }
+
+    .card {
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.04);
+  display: flex;
+  flex-direction: column;  /* importante */
+  gap: 10px;
+  min-height: 140px;
+}
+
+
+    .card-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .card-city {
+      font-weight: 600;
+    }
+
+    .card-type {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.72rem;
+      color: var(--primary);
+      background: rgba(33,12,255,0.06);
+      padding: 4px 10px;
+      border-radius: 999px;
+    }
+
+    .card-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .card-meta {
+      font-size: 0.93rem;
+      color: #555;
+    }
+
+    .card-footer {
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: #666;
+    }
+
+.card button {
+    margin-top: auto;        /* empurra o botão para baixo do card */
+    align-self: flex-start;
+    border: none;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    background: rgba(33,12,255,0.08);
+    color: var(--primary);
+  }
+  
+  .card button:hover {
+    background: rgba(33,12,255,0.16);
+  }
+  
+
+    /* MODAL (TELA POR CIMA) */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      display: none;           /* começa escondido */
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-overlay.is-open {
+      display: flex;          /* mostra quando adiciona a classe */
+    }
+
+    .modal {
+      background: #ffffff;
+      border-radius: 16px;
+      max-width: 520px;
+      width: 90%;
+      padding: 20px 22px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    .modal-close {
+      border: none;
+      background: transparent;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #666;
+    }
+
+    .modal-body p {
+      margin: 6px 0;
+      font-size: 0.95rem;
+      color: #333;
+    }
+
+    .modal-body strong {
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <!-- NAV -->
+  <header class="site-header">
+    <nav class="navigation" role="navigation">
+      <div class="logo">Psiconecta</div>
+      <ul class="nav-list">
+        <li><a href="index.html#home" class="nav-link">Home</a></li>
+        <li><a href="index.html#sobre-nos" class="nav-link">Sobre Nós</a></li>
+        <li><a href="index.html#beneficios" class="nav-link">Benefícios</a></li>
+        <li><a href="eventos.html" class="nav-link">Eventos</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <!-- HEADER PÁGINA -->
+  <section class="page-header">
+    <div class="page-header-inner">
+      <h1>Eventos de Psicologia</h1>
+      <p>Encontre congressos, workshops e seminários em Teresina, São Paulo, Rio de Janeiro e Fortaleza.</p>
+    </div>
+  </section>
+
+  <!-- CONTEÚDO -->
+  <main>
+    <!-- FILTROS -->
+    <section class="filters">
+      <input type="text" placeholder="Buscar por nome do evento..." />
+      <input type="text" placeholder="Cidade" />
+      <select>
+        <option value="">Tipo de evento</option>
+        <option value="congresso">Congresso</option>
+        <option value="seminario">Seminário</option>
+        <option value="workshop">Workshop</option>
+        <option value="curso">Curso</option>
+      </select>
+      <button>Filtrar</button>
+    </section>
+
+    <!-- CARDS -->
+    <section class="cards-grid">
+      <!-- Cada card recebe data-* com infos extras -->
+      <article class="card">
+        <div class="card-header-line">
+          <span class="card-city">Teresina</span>
+          <span class="card-type">Workshop</span>
+        </div>
+        <h2 class="card-title">Avaliação Psicológica Infantil na Prática Clínica</h2>
+        <p class="card-meta">05/04/2026 • Presencial • 8h de duração</p>
+        <p class="card-footer">Facilitadora: Dra. Marina Costa</p>
+        <button class="btn-detalhes"
+          data-titulo="Avaliação Psicológica Infantil na Prática Clínica"
+          data-cidade="Teresina"
+          data-tipo="Workshop"
+          data-data="05/04/2026"
+          data-formato="Presencial"
+          data-carga="8h de duração"
+          data-descricao="Foco em instrumentos e técnicas de avaliação infantil, com estudo de casos e discussão em grupo.">
+          Ver detalhes
+        </button>
+      </article>
+
+      <article class="card">
+        <div class="card-header-line">
+          <span class="card-city">Teresina</span>
+          <span class="card-type">Simpósio</span>
+        </div>
+        <h2 class="card-title">Saúde Mental na Adolescência</h2>
+        <p class="card-meta">20/05/2026 • Online • Manhã e tarde</p>
+        <p class="card-footer">Instituto de Psicologia do Piauí</p>
+        <button class="btn-detalhes"
+          data-titulo="Saúde Mental na Adolescência"
+          data-cidade="Teresina"
+          data-tipo="Simpósio"
+          data-data="20/05/2026"
+          data-formato="Online"
+          data-carga="Período da manhã e tarde"
+          data-descricao="Discussão de desafios atuais da adolescência, automutilação, uso de redes sociais e estratégias de intervenção.">
+          Ver detalhes
+        </button>
+      </article>
+
+      <!-- SÃO PAULO -->
+      <article class="card">
+        <div class="card-header-line">
+          <span class="card-city">São Paulo</span>
+          <span class="card-type">Congresso</span>
+        </div>
+        <h2 class="card-title">Congresso de Psicologia Clínica</h2>
+        <p class="card-meta">28–30/05/2026 • Híbrido</p>
+        <p class="card-footer">Tema central: Saúde mental e tecnologia</p>
+        <button class="btn-detalhes"
+          data-titulo="Congresso de Psicologia Clínica"
+          data-cidade="São Paulo"
+          data-tipo="Congresso"
+          data-data="28–30/05/2026"
+          data-formato="Híbrido"
+          data-carga="3 dias de programação"
+          data-descricao="Palestras, mesas-redondas e workshops sobre o impacto da tecnologia na clínica psicológica.">
+          Ver detalhes
+        </button>
+      </article>
+
+      <article class="card">
+        <div class="card-header-line">
+          <span class="card-city">São Paulo</span>
+          <span class="card-type">Workshop</span>
+        </div>
+        <h2 class="card-title">Terapia Cognitivo-Comportamental passo a passo</h2>
+        <p class="card-meta">12/04/2026 • Presencial • Turma reduzida</p>
+        <p class="card-footer">Facilitadora: Dra. Ana Silva</p>
+        <button class="btn-detalhes"
+          data-titulo="Terapia Cognitivo-Comportamental passo a passo"
+          data-cidade="São Paulo"
+          data-tipo="Workshop"
+          data-data="12/04/2026"
+          data-formato="Presencial"
+          data-carga="1 dia intensivo"
+          data-descricao="Abordagem prática de TCC com foco em formulação de casos, técnicas centrais e planejamento de sessões.">
+          Ver detalhes
+        </button>
+      </article>
+
+      <!-- RIO DE JANEIRO -->
+      <article class="card">
+        <div class="card-header-line">
+          <span class="card-city">Rio de Janeiro</span>
+          <span class="card-type">Encontro</span>
+        </div>
+        <h2 class="card-title">Psicologia Hospitalar na Prática</h2>
+        <p class="card-meta">10/06/2026 • Presencial • Hospital Universitário</p>
+        <p class="card-footer">Discussão de casos e protocolos</p>
+        <button class="btn-detalhes"
+          data-titulo="Psicologia Hospitalar na Prática"
+          data-cidade="Rio de Janeiro"
+          data-tipo="Encontro"
+          data-data="10/06/2026"
+          data-formato="Presencial"
+          data-carga="Tarde inteira"
+          data-descricao="Encontro para discussão de casos em contexto hospitalar, comunicação com equipes e famílias.">
+          Ver detalhes
+        </button>
+      </article>
+
+      <article class="card">
+        <div class="card-header-line">
+          <span class="card-city">Rio de Janeiro</span>
+          <span class="card-type">Curso</span>
+        </div>
+        <h2 class="card-title">Atualização em Psicoterapia Breve</h2>
+        <p class="card-meta">22/07/2026 • Online • 12h ao vivo</p>
+        <p class="card-footer">Certificado de participação incluso</p>
+        <button class="btn-detalhes"
+          data-titulo="Atualização em Psicoterapia Breve"
+          data-cidade="Rio de Janeiro"
+          data-tipo="Curso"
+          data-data="22/07/2026"
+          data-formato="Online"
+          data-carga="12h ao vivo"
+          data-descricao="Curso focado em modelos breves de psicoterapia, indicação, manejo e encerramento de processo.">
+          Ver detalhes
+        </button>
+      </article>
+
+      <!-- FORTALEZA -->
+      <article class="card">
+        <div class="card-header-line">
+          <span class="card-city">Fortaleza</span>
+          <span class="card-type">Seminário</span>
+        </div>
+        <h2 class="card-title">Psicologia Organizacional e Saúde Mental no Trabalho</h2>
+        <p class="card-meta">18/08/2026 • Presencial</p>
+        <p class="card-footer">Voltado para psicólogos e RH</p>
+        <button class="btn-detalhes"
+          data-titulo="Psicologia Organizacional e Saúde Mental no Trabalho"
+          data-cidade="Fortaleza"
+          data-tipo="Seminário"
+          data-data="18/08/2026"
+          data-formato="Presencial"
+          data-carga="Dia inteiro"
+          data-descricao="Discussão de práticas de promoção de saúde mental e prevenção de adoecimento no ambiente corporativo.">
+          Ver detalhes
+        </button>
+      </article>
+
+      <article class="card">
+        <div class="card-header-line">
+          <span class="card-city">Fortaleza</span>
+          <span class="card-type">Workshop</span>
+        </div>
+        <h2 class="card-title">Psicologia Positiva na Clínica</h2>
+        <p class="card-meta">02/09/2026 • Híbrido</p>
+        <p class="card-footer">Inclui material digital para aplicação em sessão</p>
+        <button class="btn-detalhes"
+          data-titulo="Psicologia Positiva na Clínica"
+          data-cidade="Fortaleza"
+          data-tipo="Workshop"
+          data-data="02/09/2026"
+          data-formato="Híbrido"
+          data-carga="4 encontros"
+          data-descricao="Apresentação de intervenções baseadas em Psicologia Positiva para uso em processos psicoterapêuticos.">
+          Ver detalhes
+        </button>
+      </article>
+    </section>
+  </main>
+
+  <!-- MODAL -->
+  <div class="modal-overlay" id="modal-overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+      <div class="modal-header">
+        <h2 class="modal-title" id="modal-title">Detalhes do evento</h2>
+        <button class="modal-close" id="modal-close" aria-label="Fechar">×</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Cidade:</strong> <span id="modal-cidade"></span></p>
+        <p><strong>Tipo:</strong> <span id="modal-tipo"></span></p>
+        <p><strong>Data:</strong> <span id="modal-data"></span></p>
+        <p><strong>Formato:</strong> <span id="modal-formato"></span></p>
+        <p><strong>Carga horária:</strong> <span id="modal-carga"></span></p>
+        <p><strong>Descrição:</strong> <span id="modal-descricao"></span></p>
+      </div>
+    </div>
+  </div>
+
+  
+  <footer class="footer">
+      <div class="footer-container">
+          <div class="footer-grid">
+              
+
+              <div class="footer-column">
+                  <h3 class="footer-heading">Sobre a Plataforma</h3>
+                  <p class="footer-text">
+                      Conectamos psicólogos a supervisores qualificados, promovendo desenvolvimento profissional e excelência no atendimento.
+                  </p>
+              </div>
+
+              <div class="footer-column">
+                  <h3 class="footer-heading">Links Rápidos</h3>
+                  <ul class="footer-links">
+                      <li><a href="#" class="footer-link">Como Funciona</a></li>
+                      <li><a href="#" class="footer-link">Para Psicólogos</a></li>
+                      <li><a href="#" class="footer-link">Para Supervisores</a></li>
+                      <li><a href="#" class="footer-link">Planos e Preços</a></li>
+                      <li><a href="#" class="footer-link">Blog</a></li>
+                  </ul>
+              </div>
+
+              <div class="footer-column">
+                  <h3 class="footer-heading">Suporte</h3>
+                  <ul class="footer-links">
+                      <li><a href="#" class="footer-link">Central de Ajuda</a></li>
+                      <li><a href="#" class="footer-link">Perguntas Frequentes</a></li>
+                      <li><a href="#" class="footer-link">Termos de Uso</a></li>
+                      <li><a href="#" class="footer-link">Política de Privacidade</a></li>
+                      <li><a href="#" class="footer-link">Contato</a></li>
+                  </ul>
+              </div>
+
+
+              <div class="footer-column">
+                  <h3 class="footer-heading">Contato</h3>
+                  <ul class="footer-contact">
+                      <li class="footer-contact-item">
+                          <svg class="footer-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                          </svg>
+                          <span>psiconecta@plataforma.com.br</span>
+                      </li>
+                      <li class="footer-contact-item">
+                          <svg class="footer-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                          </svg>
+                          <span>(86) 9999-9999</span>
+                      </li>
+                      <li class="footer-contact-item">
+                          <svg class="footer-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          </svg>
+                          <span>Teresina, PI - Brasil</span>
+                      </li>
+                  </ul>
+
+                  <div class="social-links">
+                      <a href="#" class="social-link" aria-label="Facebook">
+                          <svg fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                          </svg>
+                      </a>
+                      <a href="#" class="social-link" aria-label="Twitter">
+                          <svg fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                          </svg>
+                      </a>
+                      <a href="#" class="social-link" aria-label="LinkedIn">
+                          <svg fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                          </svg>
+                      </a>
+                      <a href="#" class="social-link" aria-label="Pinterest">
+                          <svg fill="currentColor" viewBox="0 0 24 24">
+                              <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
+                          </svg>
+                      </a>
+                  </div>
+              </div>
+
+          </div>
+
+          <div class="footer-bottom">
+              <div class="footer-bottom-content">
+                  <p class="footer-copyright">© 2025 Plataforma de Supervisão Psicológica. Todos os direitos reservados.</p>
+                  <div class="footer-bottom-links">
+                      <a href="#" class="footer-link">Política de Cookies</a>
+                      <a href="#" class="footer-link">Acessibilidade</a>
+                      <a href="#" class="footer-link">Mapa do Site</a>
+                  </div>
+              </div>
+          </div>
+      </div>
+  </footer>
+
+  <script>
+    const overlay = document.getElementById('modal-overlay');
+    const closeBtn = document.getElementById('modal-close');
+
+    const spanCidade = document.getElementById('modal-cidade');
+    const spanTipo = document.getElementById('modal-tipo');
+    const spanData = document.getElementById('modal-data');
+    const spanFormato = document.getElementById('modal-formato');
+    const spanCarga = document.getElementById('modal-carga');
+    const spanDescricao = document.getElementById('modal-descricao');
+    const modalTitle = document.getElementById('modal-title');
+
+    function abrirModal(botao) {
+      modalTitle.textContent = botao.dataset.titulo;
+      spanCidade.textContent = botao.dataset.cidade;
+      spanTipo.textContent = botao.dataset.tipo;
+      spanData.textContent = botao.dataset.data;
+      spanFormato.textContent = botao.dataset.formato;
+      spanCarga.textContent = botao.dataset.carga;
+      spanDescricao.textContent = botao.dataset.descricao;
+
+      overlay.classList.add('is-open');
+    }
+
+    function fecharModal() {
+      overlay.classList.remove('is-open');
+    }
+
+    document.querySelectorAll('.btn-detalhes').forEach(btn => {
+      btn.addEventListener('click', () => abrirModal(btn));
+    });
+
+    closeBtn.addEventListener('click', fecharModal);
+
+    overlay.addEventListener('click', (event) => {
+      if (event.target === overlay) {
+        fecharModal();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        fecharModal();
+      }
+    });
+  </script>
+</body>
+</html>
